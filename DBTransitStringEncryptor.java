@@ -17,7 +17,7 @@ public class DBTransitStringEncryptor extends DBBaseEncryptor {
     }
 
     public String decryptString(byte[] data, byte[] key, byte[] iv) throws GeneralSecurityException, UnsupportedEncodingException {
-        decryptData(data, key, iv);
-        return new String(data, stringEncoding);
+        byte[] decryptedData = decryptData(data, key, iv);
+        return new String(decryptedData, stringEncoding);
     }
 }
