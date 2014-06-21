@@ -33,13 +33,27 @@ Encryption
 
 ### Using in-memory X.509 Public Key
 ```java
+
     final String publicKeyContent = "MIIDvzCCAyigAwI...."; // Base64 encoded key
     byte [] publicKey = Base64.decode(publicKeyContent, 0);
     
     try{
-            DBTransitEncryptor encryptor = new DBBaseEncryptor(publicKey);
+            DBTransitEncryptor encryptor = new DBTransitEncryptor(publicKey);
     }
     catch (GeneralSecurityException e){}
+```
+
+### Encrypt String
+```java
+    
+    DBTransitEncryptor encryptor = new DBTransitEncryptor(publicKey);
+
+    encryptor.encryptString("Hello World", new DBTransitEncryptor.EncryptorCallback() {
+        @Override
+        public void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException {
+            // Encrypted Data Available Here
+        }
+    });
 ```
 
 ### Encrypt byte[]
@@ -47,8 +61,8 @@ Encryption
 
   String firstData = "hello world";
   try{
-          DBBaseEncryptor encryptor = new DBBaseEncryptor(publicKey);
-          encryptor.encryptData(firstData.getBytes(), new DBBaseEncryptor.EncryptorCallback() {
+          DBTransitEncryptor encryptor = new DBTransitEncryptor(publicKey);
+          encryptor.encryptData(firstData.getBytes(), new DBTransitEncryptor.EncryptorCallback() {
                 @Override
                 public void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException {
                     // Encrypted data is available here
@@ -63,16 +77,18 @@ Decryption
 
 ### Using Bundled PKCS#12 RSA Private Key (.p12)
 ```java
+
   final String privateKeyAlias = "6df39e5383f8932jsand93j008972kjs8wwqwq87";
   final AssetManager assetMgr = getResources().getAssets();
   
-  DBBaseEncryptor encryptor = new DBBaseEncryptor(publicKey);
+  DBTransitEncryptor encryptor = new DBTransitEncryptor(publicKey);
   encryptor.setPrivateKey(assetMgr.open("private_key.p12"),privateKeyAlias,"password");
 ```
 
 ### Decrypt byte[]
 ```java
-  DBBaseEncryptor encryptor = new DBBaseEncryptor(publicKey);
+
+  DBTransitEncryptor encryptor = new DBTransitEncryptor(publicKey);
   encryptor.setPrivateKey(assetMgr.open("private_key.p12"),privateKeyAlias,"password");
   
   byte[] decryptedData = encryptor.decryptData(encryptedData, key, iv);
@@ -86,6 +102,53 @@ The `ivMixer` gives access to the data, key, and iv immediately after the data i
 
 The `ivSeparator` is the opposite of the `ivMixer`. The `ivSeparator` should be implemented in a way which undoes the mixing algorithm and returns the iv. **The `ivSeparator` is only needed for decryption.**
 
+### IV Mixing Example
+```java
+
+    byte[] data = ("Hello World").getBytes();
+    DBTransitEncryptor encryptor = new DBTransitEncryptor(publicKey);
+    
+    encryptor.encryptData(data, new DBTransitEncryptor.IVMixerInterface() {
+        @Override
+        public DBTransitEncryptor.IVMix ivMixer(byte[] data, byte[] key, byte[] iv) throws GeneralSecurityException {
+            // Prepends the iv to the key before the key is encrypted
+            DBTransitEncryptor.IVMix mix = new DBTransitEncryptor.IVMix();
+            byte[] mixedKey = new byte[iv.length + key.length];
+            System.arraycopy(iv, 0, mixedKey, 0, iv.length);
+            System.arraycopy(key, 0, mixedKey, iv.length, key.length);
+            mix.key = mixedKey;
+            mix.data = data;
+            return mix;
+
+        }
+    }, new DBTransitEncryptor.EncryptorCallback() {
+        @Override
+        public void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException {
+            // Mixed key available here as 'key'
+        }
+    });
+    
+    byte[] decryptedData = encryptor.decryptData(data, key, new DBTransitEncryptor.IVSeparatorInterface() {
+        @Override
+        public DBTransitEncryptor.IVSeparate ivSeparator(byte[] data, byte[] key) throws GeneralSecurityException {
+
+            // Extracts the iv from the key before decryption
+
+            int ivSize = 16;
+            byte[] iv = new byte[ivSize];
+            System.arraycopy(key, 0, iv, 0, ivSize);
+            byte[] newKey = new byte[key.length - ivSize];
+            System.arraycopy(key, ivSize, newKey, 0, key.length - ivSize);
+
+            DBTransitEncryptor.IVSeparate sep = new DBTransitEncryptor.IVSeparate();
+            sep.data = data;
+            sep.iv = iv;
+            sep.key = newKey;
+
+            return sep;
+        }
+    });
+```
 
 License
 ---------------
