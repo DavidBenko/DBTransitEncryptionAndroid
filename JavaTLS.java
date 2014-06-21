@@ -1,5 +1,3 @@
-package com.mastercard.loyaltyrtr.dbtransitencryption.app.DBTransitEncryptionAndroid;
-
 import android.util.Base64;
 import android.util.Log;
 

@@ -1,5 +1,3 @@
-package DavidBenko.DBTransitEncryptionAndroid;
-
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 
