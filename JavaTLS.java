@@ -1,3 +1,5 @@
+package com.mastercard.loyaltyrtr.dbtransitencryption.app.DBTransitEncryptionAndroid;
+
 import android.util.Base64;
 import android.util.Log;
 
@@ -23,6 +25,8 @@ import javax.crypto.spec.SecretKeySpec;
  */
 
 public class JavaTLS {
+    private static final String LOG_TAG = "DBTransitEncryption";
+
     private static final String RSA_TRANSFORM = "RSA/ECB/PKCS1Padding";
     private static final String X509_ALGORITHM = "X509";
     private static final String RSA_PRIVATE_TRANSFORM = "PKCS12";
@@ -36,7 +40,7 @@ public class JavaTLS {
     private PrivateKey privateKey;
 
     public interface EncryptorCallback {
-        void onComplete(byte[] key, byte[] encryptedData, byte[] iv);
+        void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException;
     }
 
     //================================================================================
@@ -81,7 +85,7 @@ public class JavaTLS {
         return data;
     }
 
-    public byte[] generateKey(){
+    private byte[] generateKey(){
         byte[] key = new byte[ALGORITHM_KEY_SIZE];
         return getRandomData(key);
     }
@@ -95,7 +99,7 @@ public class JavaTLS {
     // RSA Encryption
     //================================================================================
 
-    public byte[] rsaEncryptData(byte[]data) throws GeneralSecurityException
+    private byte[] rsaEncryptData(byte[]data) throws GeneralSecurityException
     {
         Cipher cipher = Cipher.getInstance(RSA_TRANSFORM);
         cipher.init(Cipher.ENCRYPT_MODE, this.publicKey);
@@ -117,13 +121,14 @@ public class JavaTLS {
     // AES Encryption
     //================================================================================
 
-    public void encryptPayload(byte[] data, byte[] key, final EncryptorCallback callback) throws GeneralSecurityException
+    private void encryptPayload(byte[] data, final EncryptorCallback callback) throws GeneralSecurityException
     {
         Cipher cipher = Cipher.getInstance(TRANSFORM);
+        byte[] key = generateKey();
         SecretKeySpec keySpec = new SecretKeySpec(key, ALGORITHM);
         byte[] iv = generateIV();
-        IvParameterSpec ivspec = new IvParameterSpec(iv);
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivspec);
+        IvParameterSpec ivSpec = new IvParameterSpec(iv);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
         callback.onComplete(key, cipher.doFinal(data), iv);
     }
 
@@ -139,4 +144,20 @@ public class JavaTLS {
         cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
         return cipher.doFinal(data);
     }
+
+    //================================================================================
+    // AES Decryption
+    //================================================================================
+
+    public void encryptData(byte[] data, final EncryptorCallback callback) throws GeneralSecurityException
+    {
+        encryptPayload(data,new EncryptorCallback() {
+            @Override
+            public void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException{
+                byte[] rsaEncryptedKey = rsaEncryptData(key);
+                callback.onComplete(rsaEncryptedKey,encryptedData,iv);
+            }
+        });
+    }
+
 }
