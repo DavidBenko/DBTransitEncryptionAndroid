@@ -22,7 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Created by davidbenko on 5/21/14.
  */
 
-public class JavaTLS {
+public class DBBaseEncryptor {
 
     public static class IVMix{
         public byte[] data;
@@ -70,7 +70,7 @@ public class JavaTLS {
     // Init
     //================================================================================
 
-    public JavaTLS(byte[] x509PublicKeyData) throws GeneralSecurityException{
+    public DBBaseEncryptor(byte[] x509PublicKeyData) throws GeneralSecurityException{
         this.publicKey = loadPublicKey(x509PublicKeyData);
     }
 
