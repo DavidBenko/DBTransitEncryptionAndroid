@@ -15,6 +15,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -29,9 +30,14 @@ public class JavaTLS {
     private static final String TRANSFORM = "AES/CBC/PKCS5Padding";
 
     private static final Integer ALGORITHM_KEY_SIZE = 16;
+    private static final Integer ALGORITHM_IV_SIZE = 16;
 
     private PublicKey publicKey;
     private PrivateKey privateKey;
+
+    public interface EncryptorCallback {
+        void onComplete(byte[] key, byte[] encryptedData, byte[] iv);
+    }
 
     //================================================================================
     // Init
@@ -80,6 +86,11 @@ public class JavaTLS {
         return getRandomData(key);
     }
 
+    private byte[] generateIV(){
+        byte[] iv = new byte[ALGORITHM_IV_SIZE];
+        return getRandomData(iv);
+    }
+
     //================================================================================
     // RSA Encryption
     //================================================================================
@@ -106,23 +117,26 @@ public class JavaTLS {
     // AES Encryption
     //================================================================================
 
-    public  byte[] encryptPayload(byte[] data, byte[] key) throws GeneralSecurityException
+    public void encryptPayload(byte[] data, byte[] key, final EncryptorCallback callback) throws GeneralSecurityException
     {
         Cipher cipher = Cipher.getInstance(TRANSFORM);
-        SecretKeySpec secretKey = new SecretKeySpec(key, ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        return cipher.doFinal(data);
+        SecretKeySpec keySpec = new SecretKeySpec(key, ALGORITHM);
+        byte[] iv = generateIV();
+        IvParameterSpec ivspec = new IvParameterSpec(iv);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivspec);
+        callback.onComplete(key, cipher.doFinal(data), iv);
     }
 
     //================================================================================
     // AES Decryption
     //================================================================================
 
-    public byte[] decryptPayload(byte[] data, byte[] key) throws GeneralSecurityException
+    public byte[] decryptPayload(byte[] data, byte[] key, byte[] iv) throws GeneralSecurityException
     {
         Cipher cipher = Cipher.getInstance(TRANSFORM);
-        SecretKeySpec secretKey = new SecretKeySpec(key, ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        IvParameterSpec ivSpec = new IvParameterSpec(iv);
+        SecretKeySpec keySpec = new SecretKeySpec(key, ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
         return cipher.doFinal(data);
     }
 }
