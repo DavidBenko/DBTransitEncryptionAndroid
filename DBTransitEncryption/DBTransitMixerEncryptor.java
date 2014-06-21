@@ -3,7 +3,7 @@ import java.security.GeneralSecurityException;
 /**
  * Created by davidbenko on 6/21/14.
  */
-public class DBTransitMixerEncryptor extends DBBaseEncryptor {
+abstract class DBTransitMixerEncryptor extends DBBaseEncryptor {
 
     public static class IVMix{
         public byte[] data;

@@ -4,7 +4,7 @@ import java.security.GeneralSecurityException;
 /**
  * Created by prndl2 on 6/20/14.
  */
-public class DBTransitStringEncryptor extends DBTransitMixerEncryptor {
+abstract class DBTransitStringEncryptor extends DBTransitMixerEncryptor {
     public String stringEncoding;
 
     public DBTransitStringEncryptor(byte[] x509PublicKeyData) throws GeneralSecurityException {

@@ -5,7 +5,7 @@ import android.util.Base64;
 /**
  * Created by davidbenko on 6/21/14.
  */
-public class DBTransitBase64Encryptor extends DBTransitStringEncryptor {
+abstract class DBTransitBase64Encryptor extends DBTransitStringEncryptor {
 
     public interface EncryptorBase64Callback {
         void onComplete(String base64Key, String base64Data, String base64IV) throws GeneralSecurityException;

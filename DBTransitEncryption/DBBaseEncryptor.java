@@ -22,7 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Created by davidbenko on 5/21/14.
  */
 
-public class DBBaseEncryptor {
+abstract class DBBaseEncryptor {
 
     public interface EncryptorCallback {
         void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException;
