@@ -1,3 +1,5 @@
+package com.mastercard.loyaltyrtr.dbtransitencryption.app.DBTransitEncryptionAndroid;
+
 import android.util.Base64;
 import android.util.Log;
 
@@ -23,6 +25,32 @@ import javax.crypto.spec.SecretKeySpec;
  */
 
 public class JavaTLS {
+
+    public static class IVMix{
+        public byte[] data;
+        public byte[] key;
+
+        public IVMix(){}
+    }
+
+    public static class IVSeparate{
+        public byte[] data;
+        public byte[] key;
+        public byte[] iv;
+
+        public IVSeparate(){}
+    }
+
+    public interface EncryptorCallback {
+        void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException;
+    }
+    public interface IVMixerInterface {
+        IVMix ivMixer(byte[] data, byte[] key, byte[] iv)throws GeneralSecurityException;
+    }
+    public interface IVSeparatorInterface {
+        IVSeparate ivSeparator(byte[] data, byte[] key) throws GeneralSecurityException;
+    }
+
     private static final String LOG_TAG = "DBTransitEncryption";
 
     private static final String RSA_TRANSFORM = "RSA/ECB/PKCS1Padding";
@@ -37,9 +65,8 @@ public class JavaTLS {
     private PublicKey publicKey;
     private PrivateKey privateKey;
 
-    public interface EncryptorCallback {
-        void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException;
-    }
+    public IVMixerInterface ivMixer;
+    public IVSeparatorInterface ivSeparator;
 
     //================================================================================
     // Init
@@ -158,6 +185,18 @@ public class JavaTLS {
         });
     }
 
+    public void encryptData(byte[] data, final IVMixerInterface ivMixer, final EncryptorCallback callback) throws GeneralSecurityException
+    {
+        encryptPayload(data, new EncryptorCallback() {
+            @Override
+            public void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException {
+                IVMix mix = ivMixer.ivMixer(encryptedData,key,iv);
+                byte[] rsaEncryptedKey = rsaEncryptData(mix.key);
+                callback.onComplete(rsaEncryptedKey,mix.data,iv);
+            }
+        });
+    }
+
     //================================================================================
     // Public Decryption Methods
     //================================================================================
@@ -166,6 +205,13 @@ public class JavaTLS {
     {
         byte[] decryptedKey = rsaDecryptData(key);
         return decryptPayload(data,decryptedKey,iv);
+    }
+
+    public byte[] decryptData(byte[] data, byte[] key, IVSeparatorInterface ivSeparator) throws GeneralSecurityException
+    {
+        byte[] decryptedKey = rsaDecryptData(key);
+        IVSeparate sep = ivSeparator.ivSeparator(data,decryptedKey);
+        return decryptPayload(sep.data,sep.key,sep.iv);
     }
 
 }
