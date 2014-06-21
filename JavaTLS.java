@@ -1,5 +1,3 @@
-package com.mastercard.loyaltyrtr.dbtransitencryption.app.DBTransitEncryptionAndroid;
-
 import android.util.Base64;
 import android.util.Log;
 
@@ -110,7 +108,7 @@ public class JavaTLS {
     // RSA Decryption
     //================================================================================
 
-    public byte[] rsaDecryptData(byte[]data) throws GeneralSecurityException
+    private byte[] rsaDecryptData(byte[]data) throws GeneralSecurityException
     {
         Cipher cipher = Cipher.getInstance(RSA_TRANSFORM);
         cipher.init(Cipher.DECRYPT_MODE, this.privateKey);
@@ -136,7 +134,7 @@ public class JavaTLS {
     // AES Decryption
     //================================================================================
 
-    public byte[] decryptPayload(byte[] data, byte[] key, byte[] iv) throws GeneralSecurityException
+    private byte[] decryptPayload(byte[] data, byte[] key, byte[] iv) throws GeneralSecurityException
     {
         Cipher cipher = Cipher.getInstance(TRANSFORM);
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
@@ -146,7 +144,7 @@ public class JavaTLS {
     }
 
     //================================================================================
-    // AES Decryption
+    // Public Encryption Methods
     //================================================================================
 
     public void encryptData(byte[] data, final EncryptorCallback callback) throws GeneralSecurityException
@@ -158,6 +156,16 @@ public class JavaTLS {
                 callback.onComplete(rsaEncryptedKey,encryptedData,iv);
             }
         });
+    }
+
+    //================================================================================
+    // Public Decryption Methods
+    //================================================================================
+
+    public byte[] decryptData(byte[] data, byte[] key, byte[] iv) throws GeneralSecurityException
+    {
+        byte[] decryptedKey = rsaDecryptData(key);
+        return decryptPayload(data,decryptedKey,iv);
     }
 
 }
