@@ -98,7 +98,7 @@ public class DBBaseEncryptor {
     // RSA Encryption
     //================================================================================
 
-    protected byte[] rsaEncryptData(byte[]data) throws GeneralSecurityException
+    private byte[] rsaEncryptData(byte[]data) throws GeneralSecurityException
     {
         Cipher cipher = Cipher.getInstance(RSA_TRANSFORM);
         cipher.init(Cipher.ENCRYPT_MODE, this.publicKey);
@@ -109,7 +109,7 @@ public class DBBaseEncryptor {
     // RSA Decryption
     //================================================================================
 
-    protected byte[] rsaDecryptData(byte[]data) throws GeneralSecurityException
+    private byte[] rsaDecryptData(byte[]data) throws GeneralSecurityException
     {
         Cipher cipher = Cipher.getInstance(RSA_TRANSFORM);
         cipher.init(Cipher.DECRYPT_MODE, this.privateKey);
@@ -120,7 +120,7 @@ public class DBBaseEncryptor {
     // AES Encryption
     //================================================================================
 
-    protected void encryptPayload(byte[] data, final EncryptorCallback callback) throws GeneralSecurityException
+    private void encryptPayload(byte[] data, final EncryptorCallback callback) throws GeneralSecurityException
     {
         Cipher cipher = Cipher.getInstance(TRANSFORM);
         byte[] key = generateKey();
@@ -135,7 +135,7 @@ public class DBBaseEncryptor {
     // AES Decryption
     //================================================================================
 
-    protected byte[] decryptPayload(byte[] data, byte[] key, byte[] iv) throws GeneralSecurityException
+    private byte[] decryptPayload(byte[] data, byte[] key, byte[] iv) throws GeneralSecurityException
     {
         Cipher cipher = Cipher.getInstance(TRANSFORM);
         IvParameterSpec ivSpec = new IvParameterSpec(iv);

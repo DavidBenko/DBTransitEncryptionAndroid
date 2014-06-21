@@ -4,7 +4,7 @@ import java.security.GeneralSecurityException;
 /**
  * Created by prndl2 on 6/20/14.
  */
-public class DBTransitStringEncryptor extends DBBaseEncryptor {
+public class DBTransitStringEncryptor extends DBTransitMixerEncryptor {
     public String stringEncoding;
 
     public DBTransitStringEncryptor(byte[] x509PublicKeyData) throws GeneralSecurityException {
@@ -18,6 +18,22 @@ public class DBTransitStringEncryptor extends DBBaseEncryptor {
 
     public String decryptString(byte[] data, byte[] key, byte[] iv) throws GeneralSecurityException, UnsupportedEncodingException {
         byte[] decryptedData = decryptData(data, key, iv);
-        return new String(decryptedData, stringEncoding);
+        String decryptedStr =  new String(decryptedData, stringEncoding);
+        decryptedData = null;
+        return decryptedStr;
+    }
+
+    public void encryptString(String string, final IVMixerInterface ivMixer, final EncryptorCallback callback) throws GeneralSecurityException
+    {
+        byte[] data = string.getBytes();
+        encryptData(data,ivMixer,callback);
+    }
+
+    public String decryptString(byte[] data, byte[] key, IVSeparatorInterface ivSeparator) throws GeneralSecurityException, UnsupportedEncodingException
+    {
+        byte[] decrypted = decryptData(data,key,ivSeparator);
+        String decryptedStr = new String(decrypted, stringEncoding);
+        decrypted = null;
+        return decryptedStr;
     }
 }
