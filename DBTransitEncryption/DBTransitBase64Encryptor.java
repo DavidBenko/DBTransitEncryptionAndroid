@@ -20,9 +20,9 @@ abstract class DBTransitBase64Encryptor extends DBTransitStringEncryptor {
         encryptData(data, ivMixer, new EncryptorCallback() {
             @Override
             public void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException {
-                String base64Key = Base64.encodeToString(key,0);
-                String base64Data = Base64.encodeToString(encryptedData,0);
-                String base64IV = Base64.encodeToString(iv,0);
+                String base64Key = Base64.encodeToString(key, Base64.NO_WRAP);
+                String base64Data = Base64.encodeToString(encryptedData, Base64.NO_WRAP);
+                String base64IV = Base64.encodeToString(iv, Base64.NO_WRAP);
                 callback.onComplete(base64Key,base64Data,base64IV);
             }
         });
@@ -33,9 +33,9 @@ abstract class DBTransitBase64Encryptor extends DBTransitStringEncryptor {
         encryptData(data, new EncryptorCallback() {
             @Override
             public void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException {
-                String base64Key = Base64.encodeToString(key,0);
-                String base64Data = Base64.encodeToString(encryptedData,0);
-                String base64IV = Base64.encodeToString(iv, 0);
+                String base64Key = Base64.encodeToString(key, Base64.NO_WRAP);
+                String base64Data = Base64.encodeToString(encryptedData, Base64.NO_WRAP);
+                String base64IV = Base64.encodeToString(iv, Base64.NO_WRAP);
                 callback.onComplete(base64Key,base64Data,base64IV);
             }
         });
@@ -45,9 +45,9 @@ abstract class DBTransitBase64Encryptor extends DBTransitStringEncryptor {
         encryptString(string, new EncryptorCallback() {
             @Override
             public void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException {
-                String base64Key = Base64.encodeToString(key, 0);
-                String base64Data = Base64.encodeToString(encryptedData,0);
-                String base64IV = Base64.encodeToString(iv,0);
+                String base64Key = Base64.encodeToString(key, Base64.NO_WRAP);
+                String base64Data = Base64.encodeToString(encryptedData, Base64.NO_WRAP);
+                String base64IV = Base64.encodeToString(iv, Base64.NO_WRAP);
                 callback.onComplete(base64Key,base64Data,base64IV);
             }
         });
@@ -58,9 +58,9 @@ abstract class DBTransitBase64Encryptor extends DBTransitStringEncryptor {
         encryptString(string, ivMixer, new EncryptorCallback() {
             @Override
             public void onComplete(byte[] key, byte[] encryptedData, byte[] iv) throws GeneralSecurityException {
-                String base64Key = Base64.encodeToString(key,0);
-                String base64Data = Base64.encodeToString(encryptedData,0);
-                String base64IV = Base64.encodeToString(iv,0);
+                String base64Key = Base64.encodeToString(key, Base64.NO_WRAP);
+                String base64Data = Base64.encodeToString(encryptedData, Base64.NO_WRAP);
+                String base64IV = Base64.encodeToString(iv, Base64.NO_WRAP);
                 callback.onComplete(base64Key,base64Data,base64IV);
             }
         });
